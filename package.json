@@ -1,0 +1,19 @@
+{
+  "name": "mog",
+  "version": "1.0.0",
+  "description": "Modern Object Grammar",
+  "main": "mog.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mog",
+    "object",
+    "validator",
+    "validators",
+    "middleware",
+    "express"
+  ],
+  "author": "g5095",
+  "license": "ISC"
+}
