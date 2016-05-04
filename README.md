@@ -43,6 +43,8 @@ Lets see how it works with some real world examples:
 
 ## how?
 
+### basics
+
 ```javascript
 import m from 'mog'
 
@@ -53,6 +55,31 @@ let cat = m`
 
 let validCat = cat( { fur : 'black', lives : 3 })
 ```
+
+### errors
+
+Mog will attempt to fix input if possible, for instance a @Number will accept 
+a string containing a number, ie: '1.2' vs 1.2. Mog follows the mandate: Be
+liberal in what you accept, and strict in what you hand out.
+
+If however the object fails to validate against the Mog schema, an error will 
+be thrown.
+
+```javascript
+let validCat = cat( { fur : 'black', lives : 30 })
+```
+```
+/Users/pomke/code/mog/mog.js:37
+          throw err;
+          ^
+Number must be less than 9, got 30
+
+1.        cat          @Object
+2.        cat.fur      @String [black, white, orange, brown]  -- Cats have fur colour!
+3. >>>    cat.lives    @Number { min : 1, max : 9 }           -- Lives remaining
+```
+
+### middleware
 
 Mog returns a validator function which also operates as a middleware for 
 connect / express apps: 

@@ -5,14 +5,21 @@ let express = require('express');
 let m = mog();
 
 // Define a cat object schema that we can use down the track..
-let cat = m`
-  cat            @Object                                   - Cat is a four legged creature, you need more of these
-  cat.name       @String  { min : 3, max : 35 }            - All cats should have names, this is important
-  cat.weight     @Number  { min : 2, max : 20 }            - Cat's weight, in KGs
-  cat.breed      @String [moggy, main coon] { opt }        - the breed of your cat.
-  cat.birthdate  @Date { opt }                             - date the cat was born ^_^`;
+//let cat = m`
+//  cat            @Object                                   - Cat is a four legged creature, you need more of these
+//  cat.name       @String  { min : 3, max : 35 }            - All cats should have names, this is important
+//  cat.weight     @Number  { min : 2, max : 20 }            - Cat's weight, in KGs
+//  cat.breed      @String [moggy, main coon] { opt }        - the breed of your cat.
+//  cat.birthdate  @Date { opt }                             - date the cat was born ^_^`;
+//
+//console.log( cat({cat: {name : 'mog', weight: '12'}}));   // validate object
 
-console.log( cat({cat: {name : 'mog', weight: '12'}}));   // validate object
+let cat = m` 
+   cat          @Object                                
+   cat.fur      @String [black, white, orange, brown]  -- Cats have fur colour!
+   cat.lives    @Number { min : 1, max : 9 }           -- Lives remaining` 
+
+let validCat = cat( { fur : 'black', lives : 30 })
 
 /*
 

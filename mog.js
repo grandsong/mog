@@ -110,8 +110,9 @@ function formatError(s, msg) {
   return source;
 }
 
-function dots(obj, path, setValue) {
-  let bits, setKey;
+function dots(o, path, setValue) {
+  let bits, setKey, obj = {};
+  obj[path.split('.')[0]] = o;
   if(setValue) {
     bits = path.split('.');
     setKey = bits.pop();
