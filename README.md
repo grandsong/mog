@@ -163,7 +163,7 @@ let catInCarrier = catCarrier(
    contents : { name : 'Neko', fur : 'brown' }})
 ```
 
-### Recursive schemas :O
+## ![Mog Love](https://raw.githubusercontent.com/pomke/mog/master/doc/love.png) It's cats all the way down! 
 
 Imagine you want to model a bubushka doll, you know those little wooden dolls
 which have a copy of themselves inside? Mog allows you to reference a mog schema
