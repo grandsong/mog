@@ -55,7 +55,7 @@ let validCat = cat( { fur : 'black', lives : 3 })
 ```
 
 Mog returns a validator function which also operates as a middleware for 
-conneect / express apps: 
+connect / express apps: 
 
 ```javascript
 
