@@ -1,6 +1,6 @@
 {
   "name": "mog",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Modern Object Grammar",
   "main": "mog.js",
   "scripts": {
@@ -28,5 +28,8 @@
   "devDependencies": {
     "istanbul": "^0.4.3",
     "mocha": "^2.4.5"
+  },
+  "dependencies": {
+    "isemail": "^2.1.0"
   }
 }

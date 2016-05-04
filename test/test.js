@@ -4,7 +4,7 @@ const assert = require('assert');
 const mog = require('../mog');
 const m = mog();
 
-describe('MOG', function() {
+describe('MOG Core', function() {
 
     let cat;
 
@@ -102,6 +102,41 @@ describe('MOG', function() {
 
   });
 
+
+  it('can use a mog schema as a validator itself', (done) => {
+    m.add('Cat', cat);
+
+    let catCarrier = m`
+      carrier.contents  @Cat
+      carrier.label     @String`
+
+
+    let carrier = catCarrier({label : 'Ship to Mexico!',
+                              contents : { fur : 'brown' }});
+    assert.equal(carrier.contents.fur, 'brown');
+    done();
+  });
+
+
+  it('recurses, cats all the way down..', (done) => {
+    // define a nestable type
+    m.add('Node', m`
+      node.label     @String
+      node.child     @Node {opt}`);
+    
+    let checkNodes = m`root @Node`;
+
+    let tree = checkNodes( { label : 'a', child : 
+                              { label : 'b', child : 
+                                { label : 'c' }}} );
+    assert.equal(tree.child.child.label, 'c');
+    done();
+
+  });
+
+});
+
+describe('Validators', function() {
   // desc, validator, enum, arguments, expect success, match object
   let typeTests = [
     // Object validator
@@ -116,21 +151,28 @@ describe('MOG', function() {
     ['doesn\'t match a Number', '@String', '', '', false, 123],
     ['rejects length < min', '@String', '', '{min : 3}', false, 'hi'],
     ['rejects length > max', '@String', '', '{max : 3}', false, 'hi there'],
+    ['matches regex', '@String', '', '{re : ^hello}', true, 'hello mog!'],
+    ['fails to matche regex', '@String', '', '{re : \'^hello\'}', false, 'yo mog!'],
 
     // Number validator
     ['matches a number', '@Number', '', '', true, 123],
     ['matches a string with a number', '@Number', '', '', true, '123'],
-    ['doesn\'t matche a non numeric string', '@Number', '', '', false, 'mog'],
-    ['rejects length < min', '@Number', '', '{min : 3}', false, 2],
-    ['rejects length > max', '@Number', '', '{max : 3}', false, 22],
+    ['doesn\'t match a non numeric string', '@Number', '', '', false, 'mog'],
+    ['rejects < min', '@Number', '', '{min : 3}', false, 2],
+    ['rejects > max', '@Number', '', '{max : 3}', false, 22],
+
+    //Date validator
+    ['matches a date object', '@Date', '', '', true, new Date()],
+    ['matches a string with a date', '@Date', '', '', true, '12/12/2013'],
+    ['doesn\'t match garbage', '@Date', '', '', false, 'mog'],
+    ['rejects date < min', '@Date', '', '{min : 12/12/2014}', true, '12/12/2013'],
+    ['rejects date > max', '@Date', '', '{max : 12/12/2014}', false, new Date()],
 
     //Boolean validator
     
-    //Date validator
-    
-    //Regex validator
-    
     //Email validator
+    ['matches an email', '@Email', '', '', true, 'foo@example.com'],
+    ['doesn\'t match a non email', '@Email', '', '', false, 'fooemail.com'],
     
 
   ];

@@ -16,7 +16,7 @@ type-checking in our APIs, we asserted that values existed and that they were go
 and wholesome, because we didn't want our servers to explode. 
 
 But writing lots of type-checking logic is tiresome, so we invented 
-![schemas for JSON] (http://json-schema.org) to get the job done for us, 
+[schemas for JSON] (http://json-schema.org) to get the job done for us, 
 but just like XML, JSON schemas were _verbose and silly_. 
 They were also overkill when we just wanted to stop our API servers exploding 
 from some dud input.
@@ -96,3 +96,96 @@ app.put('/cat/:id', m`
     console.log(req.body.fur)
   })
 ```
+
+## Creating your own validators
+
+It's super easy to create your own validators. Your mog instance has an _add_
+method that takes a validator name, and a function which takes the object to 
+be validated, params then enums. It should either throw with an error, or 
+return the validated (or coerced) value.
+
+Here's an example validator that only accepts Odd numbers.
+
+```javascript
+
+m.add('OddNumber', (data, params, enums) => {
+  if(params.opt && data == null) return // handle the opt param
+  let parsed = parseFloat(data)
+  if(parsed % 2) {
+    return parsed
+  } else {
+    throw new Error(`Expected an odd number, got an even one!`)
+  }
+})
+```
+
+Now you can use this just like any built-in validator with @OddNumber.
+
+[You can find the built-in validators here.](https://github.com/pomke/mog/blob/master/validators.js)
+
+## ![Mog Laughing](https://raw.githubusercontent.com/pomke/mog/master/doc/lol.png) Let's kick this up a notch
+
+BOOM! ok, this is where we let you in on a little secret, a mog schema IS 
+a validator in it's own right.  What does that mean? It means that you can 
+pass a mog schema to m.add with a name, then you can use that to validate 
+things in other schemas! Here's an example:
+
+Given a validator that validates a cat:
+
+```javascript
+let cat = m`
+    cat          @Object
+    cat.name     @String                                -- What is my name? 
+    cat.dob      @Date { opt }                          -- Date of birth
+    cat.fur      @String [black, white, orange, brown]  -- Cats have fur colour!
+    cat.lives    @Number { min : 1, max : 9, opt }      -- Lives remaining` 
+```
+
+We can then register that as a validator called @Cat:
+
+```javascript
+m.add('Cat', cat);
+```
+
+Now let's make a cat carrier that contains a cat:
+
+```javascript
+let catCarrier = m`
+  carrier.label     @String         -- Label on the cat carrier
+  carrier.contents  @Cat { opt }    -- Carrier contains an optional Cat`
+```
+
+Which works as you'd expect:
+
+```javascript
+let catInCarrier = catCarrier(
+  {label : 'Ship to Mexico!',
+   contents : { name : 'Neko', fur : 'brown' }})
+```
+
+### Recursive schemas :O
+
+Imagine you want to model a bubushka doll, you know those little wooden dolls
+which have a copy of themselves inside? Mog allows you to reference a mog schema
+validator from within itself:
+
+```javascript
+// register a validator that references it's self. Note that it should 
+// be optional, or the final child node will be invalid. 
+m.add('Bubushka', m`
+      bub.name     @String
+      bub.child    @Bubushka {opt}`);
+    
+// now we can use this as normal
+let checkBubas = m`top @Bubushka`;
+
+checkBubas( { name : 'Adel', child : { 
+                name : 'Betty', child : { 
+                  name : 'Claire', child : { 
+                    name : 'Bruce'} } } } );
+```
+
+Sadly, Bruce was unable to continue the Bubushka line. 
+ 
+
+

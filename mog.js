@@ -27,7 +27,16 @@ module.exports = function mog(registry) {
 
     // return main validator function
     return function mogware(reqOrObj, res, next) {
-      let middleware = !!res;
+      let middleware, params = null;
+      if(res && !res.__secretMog) middleware = true;
+      if(res && res.__secretMog) params = res;
+      if(params !== null) {
+        // we are acting as a validator, do validatory things ^_^
+        if(params.opt && reqOrObj == null) return;
+        if(!params.opt && reqOrObj == null) {
+          throw new Error(`Expected ${s}, got ${reqOrObj}`);
+        }
+      }
       let bits = schema.map((s) => {
         return [s, dots(reqOrObj, s.id)];
       });
@@ -36,6 +45,7 @@ module.exports = function mog(registry) {
         bits.forEach((bit) => {
           let s = bit[0], value = bit[1], validator = registry[s.type];
           try {
+            s.args.__secretMog = true;
             validator(value, s.args, s.enum);
           } catch(e) {
             throw formatError(s, e.message);
@@ -71,52 +81,8 @@ module.exports = function mog(registry) {
     registry[type] = validator;
   };
 
-  m.add('Object', (data, params) => {
-    if(params.opt && data === null) return;
-    if(!params.opt && data === null) throw new Error('missing value, expected object');
-    if(typeof data != 'object') throw new Error('must be an object');
-    return data;
-  });
-
-  m.add('String', (data, params, enums) => {
-    if(params.opt && data == null) return;
-
-    if(typeof data !== 'string') {
-      throw new Error('wrong value, required string, got ' + typeof data);
-    }
-    if(params.min && data.length < params.min) {
-      throw new Error(`string must be less than ${params.min} chars long, got ${data.length}`);
-    }
-    if(params.max && data.length > params.max) {
-      throw new Error(`string must be greater than ${params.max} chars long, got ${data.length}`);
-    }
-    return data;
-  });
-
-  m.add('Number', (data, params) => {
-    if(params.opt && data == null) return;
-    let parsed = parseFloat(data);
-    let _isnan = isNaN(parsed);
-    if(_isnan) {
-      throw new Error('wrong value, required a Number, got ' + data);
-    }
-    if(params.min && parsed < params.min) {
-      throw new Error(`Number must be greater than ${params.min}, got ${parsed}`);
-    }
-    if(params.max && parsed > params.max) {
-      throw new Error(`Number must be less than ${params.max}, got ${parsed}`);
-    }
-    return parsed;
-  });
-
-  m.add('Date', (data, params) => {
-    if(params.opt && data == null) return data;
-    let parsed = new Date(data);
-    if(parsed.toJSON() === null) {
-      throw new Error('wrong value, required a Date, could not parse', data);
-    }
-    return data;
-  });
+  // load validators
+  require('./validators')(m);
 
   return m;
 }
@@ -134,7 +100,7 @@ function formatError(s, msg) {
 
 function dots(o, path, setValue) {
   let bits, setKey, obj = {};
-  obj[path.split('.')[0]] = o;
+  obj[path.split('.')[0]] = o; // first bit always matches current object
   if(setValue) {
     bits = path.split('.');
     setKey = bits.pop();
