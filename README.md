@@ -46,7 +46,9 @@ Lets see how it works with some real world examples:
 ### basics
 
 ```javascript
-import m from 'mog'
+import mog from 'mog'
+
+const m = mog()
 
 let cat = m` 
    cat          @Object                                
