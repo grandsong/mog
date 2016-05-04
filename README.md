@@ -1,5 +1,5 @@
 
-![Mog Logo](https://raw.githubusercontent.com/pomke/mog/master/mog.png)
+![Mog Logo](https://raw.githubusercontent.com/pomke/mog/master/doc/mog.png)
 
 ## MOG: Modern Object Grammar
 

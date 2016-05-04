@@ -9,9 +9,21 @@
 module.exports = function mog(registry) {
   if(!registry) registry = {};
 
-  function m(str) {
+  function m(strings) {
     // parse input into a schema
-    let schema = parse(str[0]);
+    let s = '';
+    if(typeof strings === 'string') {
+      // we're being called as a function with one string input
+      s = strings;
+    } else {
+      // we're being called as a Tag function, smoosh it together..
+      let vars = Array.prototype.slice.call(arguments, 1);
+      strings.forEach((str) => {
+        s += str;
+        if(vars.length) s += vars.shift();
+      });
+    }
+    let schema = parse(s);
 
     // return main validator function
     return function mogware(reqOrObj, res, next) {
@@ -26,20 +38,28 @@ module.exports = function mog(registry) {
           try {
             validator(value, s.args, s.enum);
           } catch(e) {
-            console.log(e.message);
             throw formatError(s, e.message);
           }
         });
       } catch(err) {
         if(middleware) {
-          res.sendStatus(400, err);
+          if(res.status) {
+            // if we're an express middleware
+            return res.status(400).send(err);
+          } else {
+            // assume HTTP response
+            res.writeHead(400, {
+              'Content-Length': err.length,
+              'Content-Type': 'text/plain' });
+            return res.end(err);
+          }
         } else {
-          throw err; 
+          throw err;
         }
       }
 
       if(middleware) {
-        return next(res, req);
+        return next();
       } else {
         return reqOrObj;
       }
@@ -52,11 +72,13 @@ module.exports = function mog(registry) {
   };
 
   m.add('Object', (data, params) => {
-    if(params.opt && data == null) return;
+    if(params.opt && data === null) return;
+    if(!params.opt && data === null) throw new Error('missing value, expected object');
     if(typeof data != 'object') throw new Error('must be an object');
+    return data;
   });
 
-  m.add('String', (data, params) => {
+  m.add('String', (data, params, enums) => {
     if(params.opt && data == null) return;
 
     if(typeof data !== 'string') {
@@ -74,7 +96,7 @@ module.exports = function mog(registry) {
   m.add('Number', (data, params) => {
     if(params.opt && data == null) return;
     let parsed = parseFloat(data);
-    let _isnan = isNaN(data);
+    let _isnan = isNaN(parsed);
     if(_isnan) {
       throw new Error('wrong value, required a Number, got ' + data);
     }
@@ -84,7 +106,7 @@ module.exports = function mog(registry) {
     if(params.max && parsed > params.max) {
       throw new Error(`Number must be less than ${params.max}, got ${parsed}`);
     }
-    return data;
+    return parsed;
   });
 
   m.add('Date', (data, params) => {
