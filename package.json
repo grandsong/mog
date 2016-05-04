@@ -5,6 +5,10 @@
   "main": "mog.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },  
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pomke/mog.git"
   },
   "keywords": [
     "mog",
@@ -15,5 +19,10 @@
     "express"
   ],
   "author": "g5095",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pomke/mog/issues"
+  },
+  "homepage": "https://github.com/pomke/mog#readme"
+
 }
