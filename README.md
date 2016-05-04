@@ -17,9 +17,9 @@ and wholesome, because we didn't want our servers to explode.
 
 But writing lots of type-checking logic is tiresome, so we invented 
 ![schemas for JSON] (http://json-schema.org) to get the job done for us, 
-but guess what!? Just like XML, JSON schemas were _verbose and silly_. 
-They were also overkill when just wanted to stop your API server exploding 
-from some dud input anyway.
+but just like XML, JSON schemas were _verbose and silly_. 
+They were also overkill when we just wanted to stop our API servers exploding 
+from some dud input.
 
 And so Mog was invented as a simple way to describe our expectations about 
 some data. It looks a bit like _java/js/py/??-Doc_ format, and that's because 
