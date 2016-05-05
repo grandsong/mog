@@ -44,12 +44,15 @@ module.exports = function mog(registry) {
       try {
         bits.forEach((bit) => {
           let s = bit[0], value = bit[1], validator = registry[s.type];
+          let val;
           try {
             s.args.__secretMog = true;
-            validator(value, s.args, s.enum);
+            val = validator(value, s.args, s.enum);
           } catch(e) {
             throw formatError(s, e.message);
           }
+          // set the validator's returned value on the object
+          dots(reqOrObj, s.id, val);
         });
       } catch(err) {
         if(middleware) {

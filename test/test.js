@@ -23,7 +23,7 @@ describe('MOG Core', function() {
   });
 
   it('does basic object validation', (done) => {
-    let cat1 = cat({ fur : 'black', lives : 3 });
+    let cat1 = cat({ fur : 'black', lives : '3' });
     assert.equal(cat1.fur, 'black');
     assert.equal(cat1.lives, 3);
     return done();
